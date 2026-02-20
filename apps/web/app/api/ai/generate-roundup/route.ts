@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// Initialize the OpenAI client
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function POST(request: Request) {
     try {
         const body = await request.json();
@@ -17,6 +12,11 @@ export async function POST(request: Request) {
                 { status: 400 }
             );
         }
+
+        // Initialize the OpenAI client inside the request handler or use a fallback so Next.js build doesn't crash during static analysis
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY || 'dummy_key_for_build',
+        });
 
         const prompt = `
       Sen profesyonel bir içerik üreticisisin. Bana "${topic}" hakkında bir karşılaştırma makalesi (roundup) yaz.
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
         const completion = await openai.chat.completions.create({
             messages: [{ role: 'user', content: prompt }],
-            model: 'gpt-4o', // or gpt-3.5-turbo based on needs
+            model: 'gpt-4o',
             response_format: { type: 'json_object' },
         });
 
