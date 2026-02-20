@@ -1,0 +1,50 @@
+{
+    "kind": "collectionType",
+    "collectionName": "roundups",
+    "info": {
+        "singularName": "roundup",
+        "pluralName": "roundups",
+        "displayName": "Roundup"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "title": {
+            "type": "string",
+            "required": true
+        },
+        "slug": {
+            "type": "uid",
+            "targetField": "title",
+            "required": true
+        },
+        "intro": {
+            "type": "text"
+        },
+        "content": {
+            "type": "richtext"
+        },
+        "products": {
+            "type": "relation",
+            "relation": "manyToMany",
+            "target": "api::product.product",
+            "mappedBy": "roundups"
+        },
+        "seo_title": {
+            "type": "string"
+        },
+        "seo_description": {
+            "type": "text"
+        },
+        "featured_image": {
+            "type": "media",
+            "multiple": false,
+            "required": false,
+            "allowedTypes": [
+                "images"
+            ]
+        }
+    }
+}

@@ -1,0 +1,25 @@
+{
+    "name": "cms",
+    "private": true,
+    "version": "0.1.0",
+    "description": "A Strapi application",
+    "scripts": {
+        "develop": "strapi develop",
+        "start": "strapi start",
+        "build": "strapi build",
+        "strapi": "strapi"
+    },
+    "dependencies": {
+        "@strapi/strapi": "^4.25.0",
+        "@strapi/plugin-users-permissions": "^4.25.0",
+        "@strapi/plugin-i18n": "^4.25.0",
+        "pg": "^8.11.3"
+    },
+    "engines": {
+        "node": ">=18.0.0",
+        "npm": ">=6.0.0"
+    },
+    "strapi": {
+        "uuid": "random-uuid-here"
+    }
+}
