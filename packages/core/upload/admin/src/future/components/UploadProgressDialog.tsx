@@ -414,33 +414,30 @@ export const UploadProgressDialog = () => {
   };
 
   return (
-    <Drawer.Root
-      isVisible={isVisible}
-      onClose={handleClose}
-      isContentExpanded={!isMinimized}
-      maxHeight="34.2rem"
-    >
-      <DialogHeader handleClose={handleClose} />
-      <Drawer.Content>
-        <Flex
-          direction="column"
-          alignItems="stretch"
-          gap={4}
-          paddingTop={4}
-          paddingBottom={4}
-          paddingLeft={4}
-          paddingRight={4}
-        >
-          {currentFile && <FileRowRenderer file={currentFile} />}
+    <Drawer.Root isVisible={isVisible} onClose={handleClose}>
+      <Drawer.Content animationDirection="up">
+        <DialogHeader handleClose={handleClose} />
+        <Drawer.Body isExpanded={!isMinimized}>
+          <Flex
+            direction="column"
+            alignItems="stretch"
+            gap={4}
+            paddingTop={4}
+            paddingBottom={4}
+            paddingLeft={4}
+            paddingRight={4}
+          >
+            {currentFile && <FileRowRenderer file={currentFile} />}
 
-          {completedFiles.length > 0 && (
-            <CompletedFilesList>
-              {completedFiles.map((file) => (
-                <FileRowRenderer key={file.index} file={file} />
-              ))}
-            </CompletedFilesList>
-          )}
-        </Flex>
+            {completedFiles.length > 0 && (
+              <CompletedFilesList>
+                {completedFiles.map((file) => (
+                  <FileRowRenderer key={file.index} file={file} />
+                ))}
+              </CompletedFilesList>
+            )}
+          </Flex>
+        </Drawer.Body>
       </Drawer.Content>
     </Drawer.Root>
   );

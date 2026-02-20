@@ -1,37 +1,12 @@
 import * as React from 'react';
 
 import * as Dialog from '@radix-ui/react-dialog';
-import { Box, ScrollArea, IconButton } from '@strapi/design-system';
+import { Box, ScrollArea, IconButton, BoxProps, Flex } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { keyframes, styled } from 'styled-components';
 
-/* -------------------------------------------------------------------------------------------------
- * Context
- * -----------------------------------------------------------------------------------------------*/
-
-interface DrawerContextValue {
-  animationDirection?: 'up' | 'left';
-  isVisible?: boolean;
-  onClose?: () => void;
-  isContentExpanded?: boolean | undefined;
-  width?: number | string;
-  height?: number | string;
-  maxHeight?: number | string;
-}
-
-/** Duration of the close animation in ms. Use for timing cleanup (e.g. removing URL params). */
 export const DRAWER_CLOSE_ANIMATION_MS = 300;
-
-const DrawerContext = React.createContext<DrawerContextValue | null>(null);
-
-const useDrawerContext = () => {
-  const context = React.useContext(DrawerContext);
-  if (!context) {
-    throw new Error('Drawer compound components must be used within Drawer.Root');
-  }
-  return context;
-};
 
 /* -------------------------------------------------------------------------------------------------
  * Animations
@@ -84,28 +59,46 @@ const slideLeftFromRightOut = keyframes`
 `;
 
 /* -------------------------------------------------------------------------------------------------
- * Styled components
+ * Drawer.Root
  * -----------------------------------------------------------------------------------------------*/
 
-interface DrawerContainerProps {
-  $width?: number | string;
-  $height?: number | string;
-  $maxHeight?: number | string;
-  $animationDirection?: 'up' | 'left';
-}
+const DrawerRoot = ({
+  isVisible,
+  onClose,
 
-const DrawerContainer = styled(Dialog.Content)<DrawerContainerProps>`
-  display: flex;
+  children,
+}: {
+  isVisible: boolean;
+  onClose?: () => void;
+  children: React.ReactNode;
+}) => {
+  return (
+    <Dialog.Root
+      open={isVisible}
+      onOpenChange={(nextVisible) => !nextVisible && onClose?.()}
+      modal={false}
+    >
+      <Dialog.Portal>
+        <div>{children}</div>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * Drawer.Content - composable content slot (collapsible when isContentExpanded is used)
+ * Contains a scrollable area
+ * -----------------------------------------------------------------------------------------------*/
+
+const DrawerContainer = styled(Flex)<{
+  $animationDirection: DrawerContentSlotProps['animationDirection'];
+}>`
   flex-direction: column;
   position: fixed;
   bottom: 0;
   right: 0;
   padding: ${({ theme }) => theme.spaces[2]};
-  width: ${({ $width }) => (typeof $width === 'number' ? `${$width}px` : ($width ?? '400px'))};
-  height: ${({ $height }) => (typeof $height === 'number' ? `${$height}px` : ($height ?? 'auto'))};
   max-width: 100%;
-  max-height: ${({ $maxHeight }) =>
-    typeof $maxHeight === 'number' ? `${$maxHeight}px` : ($maxHeight ?? '100vh')};
   z-index: 1000;
   overflow: hidden;
 
@@ -129,19 +122,6 @@ const DrawerContainer = styled(Dialog.Content)<DrawerContainerProps>`
   }
 `;
 
-const DrawerContent = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  background-color: ${({ theme }) => theme.colors.neutral0};
-  border-radius: ${({ theme }) => theme.borderRadius};
-  box-shadow: ${({ theme }) => theme.shadows.popupShadow};
-  overflow: hidden;
-  border: 1px solid ${({ theme }) => theme.colors.neutral150};
-`;
-
 interface AnimatedBodyProps {
   $isVisible: boolean;
 }
@@ -159,67 +139,55 @@ const AnimatedBody = styled(Box)<AnimatedBodyProps>`
   }
 `;
 
-/* -------------------------------------------------------------------------------------------------
- * Drawer.Root
- * -----------------------------------------------------------------------------------------------*/
+interface DrawerContentSlotProps extends BoxProps {
+  animationDirection: 'left' | 'up';
+}
 
-const DrawerRoot = ({
-  animationDirection = 'up',
-  isVisible,
-  onClose,
-  isContentExpanded,
-  width,
-  height,
-  maxHeight,
-  children,
-}: DrawerContextValue & React.PropsWithChildren) => {
-  const contextValue: DrawerContextValue = {
-    animationDirection,
-    isVisible,
-    onClose,
-    isContentExpanded,
-    width,
-    height,
-    maxHeight,
-  };
-
+const DrawerContentSlot = ({ children, animationDirection, ...props }: DrawerContentSlotProps) => {
   return (
-    <DrawerContext.Provider value={contextValue}>
-      <Dialog.Root
-        open={isVisible}
-        onOpenChange={(nextVisible) => !nextVisible && onClose?.()}
-        modal={false}
+    <Dialog.Content
+      forceMount
+      onPointerDownOutside={(e) => e.preventDefault()}
+      onInteractOutside={(e) => e.preventDefault()}
+      asChild
+    >
+      <DrawerContainer
+        $animationDirection={animationDirection}
+        maxWidth="100%"
+        maxHeight="100vh"
+        {...props}
       >
-        <Dialog.Portal>
-          <DrawerContainer
-            $animationDirection={animationDirection}
-            $width={width}
-            $height={height}
-            $maxHeight={maxHeight}
-            forceMount
-            onPointerDownOutside={(e) => e.preventDefault()}
-            onInteractOutside={(e) => e.preventDefault()}
-          >
-            <DrawerContent>{children}</DrawerContent>
-          </DrawerContainer>
-        </Dialog.Portal>
-      </Dialog.Root>
-    </DrawerContext.Provider>
+        <Flex
+          direction="column"
+          flex="1"
+          minHeight={0}
+          width="100%"
+          background="neutral0"
+          borderRadius={1}
+          shadow="popupShadow"
+          overflow="hidden"
+          borderColor="neutral150"
+          borderStyle="solid"
+          borderWidth="1px"
+        >
+          {children}
+        </Flex>
+      </DrawerContainer>
+    </Dialog.Content>
   );
 };
 
 /* -------------------------------------------------------------------------------------------------
- * Drawer.Content - composable content slot (collapsible when isContentExpanded is used)
- * Contains a scrollable area
+ * Drawer.Body - composable body slot (collapsible, scrollable)
  * -----------------------------------------------------------------------------------------------*/
 
-const DrawerContentSlot = ({ children }: React.PropsWithChildren) => {
-  const { isContentExpanded } = useDrawerContext();
-  const isCollapsible = typeof isContentExpanded === 'boolean';
-  const isContentVisible = isCollapsible ? isContentExpanded : true;
+interface DrawerBodyProps extends React.PropsWithChildren {
+  isExpanded?: boolean;
+}
 
+const DrawerBody = ({ children, isExpanded = true }: DrawerBodyProps) => {
   return (
-    <AnimatedBody $isVisible={isContentVisible} data-collapsed={!isContentVisible}>
+    <AnimatedBody $isVisible={isExpanded} data-collapsed={!isExpanded}>
       <ScrollArea>{children}</ScrollArea>
     </AnimatedBody>
   );
@@ -253,6 +221,7 @@ const DrawerCloseButton = ({ onClose, label, children }: DrawerCloseButtonProps)
 const Drawer = {
   Root: DrawerRoot,
   Content: DrawerContentSlot,
+  Body: DrawerBody,
   CloseButton: DrawerCloseButton,
 };
 

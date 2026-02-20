@@ -327,7 +327,7 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
             })}
           </Dialog.Description>
         </VisuallyHidden>
-        <Drawer.Content>
+        <Drawer.Content width="41.6rem" height="100vh" animationDirection="left">
           <Flex justifyContent="center" padding={8}>
             <Loader>{formatMessage({ id: 'app.loading', defaultMessage: 'Loading...' })}</Loader>
           </Flex>
@@ -357,19 +357,6 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
 
   return (
     <>
-      <Flex gap={2} paddingLeft={5} paddingTop={3} paddingBottom={3} paddingRight={3}>
-        <DocIcon width={20} height={20} />
-        <Dialog.Title asChild>
-          <Typography variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis tag="h2">
-            {asset.name}
-          </Typography>
-        </Dialog.Title>
-        <Box marginLeft="auto">
-          <Drawer.CloseButton onClose={closeDetails}>
-            <ArrowLineRight />
-          </Drawer.CloseButton>
-        </Box>
-      </Flex>
       <VisuallyHidden>
         <Dialog.Description>
           {formatMessage({
@@ -378,9 +365,24 @@ const DrawerContent = ({ assetId, closeDetails }: DrawerContentProps) => {
           })}
         </Dialog.Description>
       </VisuallyHidden>
-      <Drawer.Content>
-        <AssetPreview asset={asset} />
-        <AssetDetails asset={asset} />
+      <Drawer.Content width="41.6rem" height="100vh" animationDirection="left">
+        <Flex gap={2} paddingLeft={5} paddingTop={3} paddingBottom={3} paddingRight={3}>
+          <DocIcon width={20} height={20} />
+          <Dialog.Title asChild>
+            <Typography variant="omega" fontWeight="semiBold" overflow="hidden" ellipsis tag="h2">
+              {asset.name}
+            </Typography>
+          </Dialog.Title>
+          <Box marginLeft="auto">
+            <Drawer.CloseButton onClose={closeDetails}>
+              <ArrowLineRight />
+            </Drawer.CloseButton>
+          </Box>
+        </Flex>
+        <Drawer.Body>
+          <AssetPreview asset={asset} />
+          <AssetDetails asset={asset} />
+        </Drawer.Body>
       </Drawer.Content>
     </>
   );
@@ -398,13 +400,7 @@ export const AssetDetailsDrawer = () => {
   }
 
   return (
-    <Drawer.Root
-      isVisible={isVisible}
-      onClose={closeDetails}
-      width="41.6rem"
-      height="100vh"
-      animationDirection="left"
-    >
+    <Drawer.Root isVisible={isVisible} onClose={closeDetails}>
       <DrawerContent assetId={assetId} closeDetails={closeDetails} />
     </Drawer.Root>
   );
