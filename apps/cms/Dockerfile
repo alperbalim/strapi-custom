@@ -8,6 +8,6 @@ COPY ./package.json ./package-lock.json* ./
 ENV PATH /opt/node_modules/.bin:$PATH
 RUN npm install
 COPY ./ .
-RUN npm run build -- --no-optimization
+RUN npm run build
 EXPOSE 1337
 CMD ["npm", "run", "develop"]
